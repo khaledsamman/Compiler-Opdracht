@@ -35,7 +35,7 @@ WS: [ \t\r\n]+ -> skip;
 OPEN_BRACE: '{';
 CLOSE_BRACE: '}';
 SEMICOLON: ';';
-COLON: ':';
+    COLON: ':';
 PLUS: '+';
 MIN: '-';
 MUL: '*';
@@ -46,4 +46,15 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: EOF;
+stylerule: selector OPEN_BRACE (declaration)* CLOSE_BRACE;
+
+declaration: LOWER_IDENT COLON expression SEMICOLON;
+
+expression: literal;
+
+literal: COLOR #colorLiteral | PIXELSIZE #pixelLiteral | PERCENTAGE #percentageLiteral;
+
+
+selector : LOWER_IDENT #selectorTag | CLASS_IDENT #selectorClass | ID_IDENT #selectorId;
+
 
