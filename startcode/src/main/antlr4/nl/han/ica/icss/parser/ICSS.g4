@@ -45,16 +45,20 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
+
 stylesheet: (stylerule)* EOF;
+
 stylerule: selector OPEN_BRACE (declaration)* CLOSE_BRACE;
 
 declaration: LOWER_IDENT COLON expression SEMICOLON;
 
-expression: literal;
+literal: COLOR | PIXELSIZE| PERCENTAGE | SCALAR | TRUE | FALSE;
 
-literal: COLOR #colorLiteral | PIXELSIZE #pixelLiteral | PERCENTAGE #percentageLiteral;
-
-
-selector : LOWER_IDENT #selectorTag | CLASS_IDENT #selectorClass | ID_IDENT #selectorId;
+selector : LOWER_IDENT | CLASS_IDENT | ID_IDENT;
 
 
+variableAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR expression SEMICOLON;
+expression: addExpr;
+addExpr: mulExpr (PLUS mulExpr)*;
+mulExpr: primary (MUL primary)*;
+primary: literal | CAPITAL_IDENT | OPEN_BRACE addExpr CLOSE_BRACE;
