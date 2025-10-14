@@ -52,7 +52,7 @@ stylerule: selector OPEN_BRACE (declaration)* CLOSE_BRACE;
 
 declaration: LOWER_IDENT COLON expression SEMICOLON;
 
-literal: COLOR | PIXELSIZE| PERCENTAGE | SCALAR | TRUE | FALSE;
+value: COLOR | PIXELSIZE| PERCENTAGE | SCALAR | TRUE | FALSE;
 
 selector : LOWER_IDENT | CLASS_IDENT | ID_IDENT;
 
@@ -61,4 +61,4 @@ variableAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR expression SEMICOLON;
 expression: addExpr;
 addExpr: mulExpr (PLUS mulExpr)*;
 mulExpr: primary (MUL primary)*;
-primary: literal | CAPITAL_IDENT | OPEN_BRACE addExpr CLOSE_BRACE;
+primary: value | CAPITAL_IDENT | OPEN_BRACE addExpr CLOSE_BRACE;
