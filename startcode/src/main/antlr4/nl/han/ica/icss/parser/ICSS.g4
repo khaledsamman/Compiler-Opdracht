@@ -46,9 +46,9 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 
-stylesheet: (stylerule)* EOF;
+stylesheet: (variableAssignment | stylerule)* EOF;
 
-stylerule: selector OPEN_BRACE (declaration)* CLOSE_BRACE;
+stylerule: selector OPEN_BRACE (statement)* CLOSE_BRACE;
 
 declaration: LOWER_IDENT COLON expression SEMICOLON;
 
@@ -56,9 +56,12 @@ value: COLOR | PIXELSIZE| PERCENTAGE | SCALAR | TRUE | FALSE;
 
 selector : LOWER_IDENT | CLASS_IDENT | ID_IDENT;
 
-
 variableAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR expression SEMICOLON;
 expression: addExpr;
 addExpr: mulExpr (PLUS mulExpr)*;
 mulExpr: primary (MUL primary)*;
 primary: value | CAPITAL_IDENT | OPEN_BRACE addExpr CLOSE_BRACE;
+
+statement: declaration | ifStatement;
+ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE block (ELSE block)?;
+block: OPEN_BRACE statement* CLOSE_BRACE;
