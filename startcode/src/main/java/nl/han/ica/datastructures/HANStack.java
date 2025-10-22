@@ -1,12 +1,12 @@
 package nl.han.ica.datastructures;
 
-public class HANStack implements IHANStack<T> {
+public class HANStack <T> implements IHANStack<T> {
 
     private Node<T> head;
 
     @Override
     public void push(T value) {
-        Node T  newNode = new Node<T> value;
+        Node <T>  newNode = new Node<> (value);
         newNode.setNext(head);
         head = newNode;
 
@@ -27,7 +27,7 @@ public class HANStack implements IHANStack<T> {
         if (head == null){
         return null;
     } else {
-            return (T) head.getValue();
+            return head.getValue();
         }
 
 }
