@@ -6,7 +6,7 @@ public class HANStack <T> implements IHANStack<T> {
 
     @Override
     public void push(T value) {
-        Node <T>  newNode = new Node<> (value);
+        Node<T> newNode = new Node<>(value);
         newNode.setNext(head);
         head = newNode;
 
@@ -14,20 +14,20 @@ public class HANStack <T> implements IHANStack<T> {
 
     @Override
     public T pop() {
-        if (head == null){
+        if (head == null) {
             throw new IllegalStateException("Stack Empty");
         }
-        Node <T> previousHead = head;
+        Node<T> previousHead = head;
         head = head.getNext();
         return (T) previousHead.getValue();
     }
 
     @Override
     public T peek() {
-        if (head == null){
-        return null;
-    } else {
+        if (head == null) {
+            return null;
+        } else {
             return head.getValue();
         }
-
+    }
 }

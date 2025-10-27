@@ -58,7 +58,7 @@ selector : LOWER_IDENT | CLASS_IDENT | ID_IDENT;
 
 variableAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR expression SEMICOLON;
 expression: addExpr;
-addExpr: mulExpr (PLUS mulExpr)*;
+addExpr: mulExpr ((PLUS | MIN) mulExpr)*;
 mulExpr: primary (MUL primary)*;
 primary: value | CAPITAL_IDENT | OPEN_BRACE addExpr CLOSE_BRACE;
 
