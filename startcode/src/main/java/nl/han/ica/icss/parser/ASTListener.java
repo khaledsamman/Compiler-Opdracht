@@ -23,6 +23,8 @@ public class ASTListener extends ICSSBaseListener {
 	private final IHANStack<ASTNode> parents = new HANStack<>();
 	private final IHANStack<Expression> exprStack = new HANStack<>();
 	private final IHANStack<Selector> selectorStack = new HANStack<>();
+	private final IHANStack<Integer> ifPhase = new HANStack<>(); // 0=then 1=else
+
 
 	public AST getAST() { return ast; }
 
@@ -73,6 +75,7 @@ public class ASTListener extends ICSSBaseListener {
 		String property = ctx.LOWER_IDENT().getText();
 		Expression value = exprStack.pop();
 		Declaration decl = new Declaration(property);
+		decl.addChild(value);
 		parents.peek().addChild(decl);
 	}
 
@@ -165,8 +168,49 @@ public class ASTListener extends ICSSBaseListener {
 
 //if-else
 	@Override
-	public void enterIfStatement(ICSSParser.IfStatementContext ctx) { }
+	public void enterIfStatement(ICSSParser.IfStatementContext ctx) {
+		IfClause ifc = new IfClause();
+		parents.peek().addChild(ifc);
+		parents.push(ifc);
+		ifPhase.push(0);
+	}
 
 	@Override
-	public void enterBlock(ICSSParser.BlockContext ctx) { }
+	public void exitIfStatement(ICSSParser.IfStatementContext ctx) {
+		Expression cond = exprStack.pop();
+		((IfClause) parents.peek()).conditionalExpression = cond;
+		parents.pop();
+		ifPhase.pop();
+	}
+
+
+
+	@Override
+	public void enterBlock(ICSSParser.BlockContext ctx) {
+		Integer phaseTop = ifPhase.peek();
+		if (phaseTop != null && parents.peek() instanceof IfClause) {
+			int phase = ifPhase.pop();
+			if (phase == 0) {
+				// THEN-block: kinderen direct aan IfClause.body toevoegen.
+				// Truc: push dezelfde IfClause nogmaals zodat exitBlock daarvoor kan poppen.
+				parents.push(parents.peek());
+			} else {
+				// ELSE-block: maak ElseClause en routeer kinderen daarheen.
+				ElseClause ec = new ElseClause();
+				((IfClause) parents.peek()).addChild(ec);
+				parents.push(ec);
+			}
+			ifPhase.push(phase + 1); // volgende block (indien aanwezig) wordt ELSE
+			return;
+		}
+
+		// Anders: generieke block (we gebruiken je huidige container als target)
+		parents.push(parents.peek());
+	}
+
+
+	@Override
+	public void exitBlock(ICSSParser.BlockContext ctx) {
+		parents.pop();
+	}
 }

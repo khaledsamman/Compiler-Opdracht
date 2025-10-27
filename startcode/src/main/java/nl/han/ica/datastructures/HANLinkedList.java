@@ -100,4 +100,17 @@ public class HANLinkedList<T> implements IHANLinkedList<T> {
     public int getSize() {
         return size;
     }
+
+    //methodes hieronder zijn zodat ik geen casting hoef te gebruiken
+    public T peek() {
+        return getFirst();
+    }
+
+    public T popFirst(){
+        if (head ==null) return null;
+        T value = head.getValue();
+        head = head.getNext();
+        size--;
+        return value;
+    }
 }
