@@ -51,8 +51,6 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void exitStylerule(ICSSParser.StyleruleContext ctx) {
-		Selector sel = selectorStack.pop();
-		((Stylerule) parents.peek()).selectors.add(sel);
 		parents.pop();
 	}
 
@@ -62,11 +60,11 @@ public class ASTListener extends ICSSBaseListener {
 		if (ctx.LOWER_IDENT() != null) {
 			sel = new TagSelector(ctx.LOWER_IDENT().getText());
 		} else if (ctx.CLASS_IDENT() != null) {
-			sel = new ClassSelector(ctx.CLASS_IDENT().getText().substring(1)); // '.'
+			sel = new ClassSelector(ctx.CLASS_IDENT().getText());
 		} else {
-			sel = new IdSelector(ctx.ID_IDENT().getText().substring(1));       //  #
+			sel = new IdSelector(ctx.ID_IDENT().getText());
 		}
-		selectorStack.push(sel);
+		((Stylerule) parents.peek()).addChild(sel);
 	}
 
 	//declarations en variables

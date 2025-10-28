@@ -58,6 +58,9 @@ class ParserTest {
 
 		AST sut = parseTestFile("level0.icss");
 		AST exp = Fixtures.uncheckedLevel0();
+		System.out.println("EXP: " + exp);
+		System.out.println("SUT: " + sut);
+
 		assertEquals(exp,sut);
 	}
 	@Test

@@ -80,7 +80,7 @@ public class Checker {
     }
 
     private boolean isBlockLike(ASTNode node) {
-        return false;
+        return (node instanceof IfClause) || (node instanceof ElseClause);
     }
 
 
