@@ -62,6 +62,6 @@ addExpr: mulExpr ((PLUS | MIN) mulExpr)*;
 mulExpr: primary (MUL primary)*;
 primary: value | CAPITAL_IDENT | OPEN_BRACE addExpr CLOSE_BRACE;
 
-statement: declaration | ifStatement;
+statement: declaration | ifStatement | variableAssignment;
 ifStatement: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE block (ELSE block)?;
 block: OPEN_BRACE statement* CLOSE_BRACE;
