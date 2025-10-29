@@ -3,6 +3,7 @@ package nl.han.ica.icss.transforms;
 import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.BoolLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
 import nl.han.ica.icss.ast.literals.ScalarLiteral;
@@ -166,6 +167,36 @@ public class Evaluator implements Transform {
                 node.removeChild(va);
                 continue;
             }
+            //if else
+            if (child instanceof IfClause) {
+                IfClause ifc = (IfClause) child;
+
+                Literal condLit = eval(ifc.getConditionalExpression());
+                boolean takeIfBody = isTrue(condLit);
+
+                java.util.List<ASTNode> chosen = new java.util.ArrayList<>(
+                        takeIfBody ? ifc.body : elseBody(ifc)
+                );
+
+                node.removeChild(ifc);
+
+                for (ASTNode stmt : chosen) node.addChild(stmt);
+
+                for (ASTNode stmt : chosen) {
+                    if (stmt instanceof VariableAssignment) {
+                        VariableAssignment va2 = (VariableAssignment) stmt;
+                        Literal val2 = eval(va2.expression);
+                        if (val2 != null) current().put(va2.name.name, val2);
+                        node.removeChild(va2);
+                    } else if (stmt instanceof Declaration) {
+                        reduceDecl((Declaration) stmt);
+                    } else {
+                        simplify(stmt);
+                    }
+                }
+                continue;
+            }
+
             //declaration: expression  naar literal
             if (child instanceof Declaration) {
                 reduceDecl((Declaration) child);
@@ -175,6 +206,17 @@ public class Evaluator implements Transform {
             // recursie!!
             simplify(child);
         }
+    }
+    private boolean isTrue(Literal lit) {
+        return (lit instanceof BoolLiteral) && ((BoolLiteral) lit).value;
+    }
+    private java.util.List<ASTNode> elseBody(IfClause ifc)  {
+        for (ASTNode child : ifc.getChildren()) {
+            if (child instanceof ElseClause) {
+                return ((ElseClause) child).body;
+            }
+        }
+        return java.util.Collections.emptyList();
     }
 }
 
