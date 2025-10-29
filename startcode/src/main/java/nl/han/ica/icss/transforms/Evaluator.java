@@ -3,6 +3,12 @@ package nl.han.ica.icss.transforms;
 import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.PercentageLiteral;
+import nl.han.ica.icss.ast.literals.PixelLiteral;
+import nl.han.ica.icss.ast.literals.ScalarLiteral;
+import nl.han.ica.icss.ast.operations.AddOperation;
+import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.SubtractOperation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,9 +25,12 @@ public class Evaluator implements Transform {
         scopes = new HANLinkedList<>();
         push(); // pusht een nieuwe scope op de stack
         simplify(ast.root); // begin evaluatie
-        pop(); // wanneer evaluatie klaar is
+        pop(); // sluit wanneer evaluatie klaar is
     }
 
+
+    // check of node een nieuwe scope moet krijgen. bijv. stylesheet of styleRule. if ja -> maak nieuwe 'doosje'
+    // vervolgens door de children lopen
     private void simplify(ASTNode node) {
 
         boolean opened = isScopeNode(node);
@@ -59,6 +68,10 @@ public class Evaluator implements Transform {
         return null;
     }
 
+    // evalueer expressie tot een literal
+    // als de expressie een literal is dan geef die dat gewoon terug
+    // als het een variabele is, wordt we waarden opgezocht via resolve()
+    // als het een operation is, bereken de linker en rechterkand met eval() en combineer
     private Literal eval(Expression e) {
         if (e == null) return null;
         if (e instanceof Literal) {
@@ -68,10 +81,67 @@ public class Evaluator implements Transform {
             VariableReference vr = (VariableReference) e;
             return resolve(vr.name);
         }
-        return null;
+        if (e instanceof AddOperation) {
+            AddOperation op = (AddOperation) e;
+            Literal left = eval(op.lhs);
+            Literal right = eval(op.rhs);
+            return addLiterals(left, right);
+        }
+        if (e instanceof SubtractOperation) {
+            SubtractOperation op = (SubtractOperation) e;
+            Literal left = eval(op.lhs);
+            Literal right = eval(op.rhs);
+            return subtractLiterals(left, right);
+        }
+        if (e instanceof MultiplyOperation) {
+            MultiplyOperation op = (MultiplyOperation) e;
+            Literal left = eval(op.lhs);
+            Literal right = eval(op.rhs);
+            return multiplyLiterals(left, right);
+        }
+        return new ScalarLiteral(0);
+    }
+    // tel twee literals op
+    private Literal addLiterals(Literal left, Literal right) {
+        if (left instanceof PixelLiteral && right instanceof PixelLiteral)
+            return new PixelLiteral(((PixelLiteral) left).value + ((PixelLiteral) right).value);
+        if (left instanceof PercentageLiteral && right instanceof PercentageLiteral)
+            return new PercentageLiteral(((PercentageLiteral) left).value + ((PercentageLiteral) right).value);
+        if (left instanceof ScalarLiteral && right instanceof ScalarLiteral)
+            return new ScalarLiteral(((ScalarLiteral) left).value + ((ScalarLiteral) right).value);
+        return new ScalarLiteral(0); // ongeldig typecombinatie
+    }
+
+    // trek twee literals af
+    private Literal subtractLiterals(Literal left, Literal right) {
+        if (left instanceof PixelLiteral && right instanceof PixelLiteral)
+            return new PixelLiteral(((PixelLiteral) left).value - ((PixelLiteral) right).value);
+        if (left instanceof PercentageLiteral && right instanceof PercentageLiteral)
+            return new PercentageLiteral(((PercentageLiteral) left).value - ((PercentageLiteral) right).value);
+        if (left instanceof ScalarLiteral && right instanceof ScalarLiteral)
+            return new ScalarLiteral(((ScalarLiteral) left).value - ((ScalarLiteral) right).value);
+        return new ScalarLiteral(0);
+    }
+
+    // vermenigvuldig twee literals
+    private Literal multiplyLiterals(Literal left, Literal right) {
+        if (left instanceof ScalarLiteral && right instanceof PixelLiteral)
+            return new PixelLiteral(((ScalarLiteral) left).value * ((PixelLiteral) right).value);
+        if (right instanceof ScalarLiteral && left instanceof PixelLiteral)
+            return new PixelLiteral(((ScalarLiteral) right).value * ((PixelLiteral) left).value);
+        if (left instanceof ScalarLiteral && right instanceof PercentageLiteral)
+            return new PercentageLiteral(((ScalarLiteral) left).value * ((PercentageLiteral) right).value);
+        if (right instanceof ScalarLiteral && left instanceof PercentageLiteral)
+            return new PercentageLiteral(((ScalarLiteral) right).value * ((PercentageLiteral) left).value);
+        if (left instanceof ScalarLiteral && right instanceof ScalarLiteral)
+            return new ScalarLiteral(((ScalarLiteral) left).value * ((ScalarLiteral) right).value);
+        return new ScalarLiteral(0);
     }
 
     // experssie omzetten naar een literal
+    //neemt iets zoasl width: ParWidth + 20px;
+    // roept eval() aan, die berekent het resultaat. dus als bijv. parwidt 500px. wordt width 520px;
+    // vervolgens haalt die oude expressie weg en zet die het nieuwe literal erin
     private void reduceDecl(Declaration d) {
         if (d.expression == null) return;
         Literal lit = eval(d.expression);
@@ -81,6 +151,9 @@ public class Evaluator implements Transform {
         d.addChild(lit);
     }
 
+    //loopt door alle kinderen van huidige node
+    // als het child een variabele is: bereken de waarde -> sla waarde in huidige scope op -> verwijder variabele uit de AST
+    // als het child een declaratie is: rope reduceDecl() -> berekent echte waarde. anders is het waarschijnlijk iets als een nieuwe stylerule of ifclause dus ga daar recursief in verder.
     private void simplifyChildren(ASTNode node) {
         ArrayList<ASTNode> children = new ArrayList<>(node.getChildren());
         for (ASTNode child : children) {
@@ -99,7 +172,7 @@ public class Evaluator implements Transform {
                 continue;
             }
 
-            // 3) Anders: recurseer
+            // recursie!!
             simplify(child);
         }
     }
