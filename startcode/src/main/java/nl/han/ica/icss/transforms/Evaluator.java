@@ -73,6 +73,7 @@ public class Evaluator implements Transform {
     // als de expressie een literal is dan geef die dat gewoon terug
     // als het een variabele is, wordt we waarden opgezocht via resolve()
     // als het een operation is, bereken de linker en rechterkand met eval() en combineer
+    // [TR01] eval() rekent expressies uit; reduceDecl() vervangt Declaration.expression door berekende Literal.
     private Literal eval(Expression e) {
         if (e == null) return null;
         if (e instanceof Literal) {
@@ -155,6 +156,7 @@ public class Evaluator implements Transform {
     //loopt door alle kinderen van huidige node
     // als het child een variabele is: bereken de waarde -> sla waarde in huidige scope op -> verwijder variabele uit de AST
     // als het child een declaratie is: rope reduceDecl() -> berekent echte waarde. anders is het waarschijnlijk iets als een nieuwe stylerule of ifclause dus ga daar recursief in verder.
+    // [TR01][TR02] Beide transformaties in een boomtraversal (scopes + evaluatie + if eliminatie).
     private void simplifyChildren(ASTNode node) {
         ArrayList<ASTNode> children = new ArrayList<>(node.getChildren());
         for (ASTNode child : children) {

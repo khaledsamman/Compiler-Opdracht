@@ -47,6 +47,7 @@ public class Checker {
         return semanticErrors;
     }
 
+    // [CH06] LIFO-scopes voor variabelen (Stylerule/If/Else openen en sluiten scopes); lookup zoekt inner→outer.
     private void checkNode(ASTNode node) {
         if (node == null) return;
 
@@ -101,6 +102,7 @@ public class Checker {
         currentScope().put(varName, rhsType);
     }
 
+    // [CH04] Typecheck per property (color/background-color → COLOR; width/height/... → PIXEL|PERCENTAGE).
     private void checkDeclaration(Declaration decl) {
         if (decl.expression == null) {
             error(decl, "Declaration for '" + decl.property.name + "' has no expression.");
@@ -128,7 +130,7 @@ public class Checker {
         }
     }
 
-
+// [CH05] If voorwaarde moet BOOL zijn (literal of var ref), anders semantische fout.
     private void checkIfClause(IfClause ifc) {
         if (ifc.getConditionalExpression() == null) {
             error(ifc, "If-clause without condition.");
@@ -152,6 +154,7 @@ public class Checker {
         if (e instanceof BoolLiteral)       return ExpressionType.BOOL;
 
         // var ref
+        // [CH01] Undefined variable usage: foutmelding bij ontbrekende binding in scopes.
         if (e instanceof VariableReference) {
             String name = ((VariableReference) e).name;
             ExpressionType t = resolveVar(name);
@@ -161,7 +164,8 @@ public class Checker {
             }
             return t;
         }
-
+// [CH02] +/− eisen gelijk type (pixel|percentage|scalar).
+        // [CH03] COLOR wordt niet geaccepteerd in +, −, * (alleen numeric types toegestaan).
         if (e instanceof AddOperation) {
             AddOperation op = (AddOperation) e;
             ExpressionType l = typeOf(op.lhs);

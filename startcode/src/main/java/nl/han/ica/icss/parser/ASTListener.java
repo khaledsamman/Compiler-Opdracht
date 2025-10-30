@@ -20,6 +20,7 @@ import nl.han.ica.icss.ast.selectors.TagSelector;
 public class ASTListener extends ICSSBaseListener {
 
 	private final AST ast = new AST();
+	// [PA00] Gebruik eigen HANStack<ASTNode> om AST-parents te managen.
 	private final IHANStack<ASTNode> parents = new HANStack<>();
 	private final IHANStack<Expression> exprStack = new HANStack<>();
 	private final IHANStack<Selector> selectorStack = new HANStack<>();
@@ -29,6 +30,7 @@ public class ASTListener extends ICSSBaseListener {
 	public AST getAST() { return ast; }
 
 //stylesheet
+	// [PA01] Basis CSS-structuur: stylesheet, stylerule, selector en declaration worden naar AST gezet.
 	@Override
 	public void enterStylesheet(ICSSParser.StylesheetContext ctx) {
 		Stylesheet sheet = new Stylesheet();
@@ -77,6 +79,8 @@ public class ASTListener extends ICSSBaseListener {
 		parents.peek().addChild(decl);
 	}
 
+
+	// [PA02] Variabele toekennen en VariableReference ondersteunen in expressies.
 	@Override
 	public void exitVariableAssignment(ICSSParser.VariableAssignmentContext ctx) {
 		String name = ctx.CAPITAL_IDENT().getText();
@@ -91,7 +95,8 @@ public class ASTListener extends ICSSBaseListener {
 
 
   //expressions
-  // expression is alleen een doorgeefluik
+	// [PA03] Rekenkundige expressies met correcte prioriteit (mul voor add/sub).
+	// expression is alleen een doorgeefluik
 	@Override
 	public void exitAddExpr(ICSSParser.AddExprContext ctx) {
 		int k = ctx.mulExpr().size();
@@ -115,6 +120,7 @@ public class ASTListener extends ICSSBaseListener {
 		exprStack.push(acc);
 	}
 
+	// [PA03] Rekenkundige expressies met correcte prioriteit (mul voor add/sub).
 	@Override
 	public void exitMulExpr(ICSSParser.MulExprContext ctx) {
 		int n = ctx.primary().size();
@@ -129,6 +135,7 @@ public class ASTListener extends ICSSBaseListener {
 		exprStack.push(acc);
 	}
 
+	// [PA02] Variabele toekennen en VariableReference ondersteunen in expressies.
 	@Override
 	public void exitPrimary(ICSSParser.PrimaryContext ctx) {
 		if (ctx.value() != null) {
@@ -165,6 +172,7 @@ public class ASTListener extends ICSSBaseListener {
 	}
 
 //if-else
+	// [PA04] IfClause + optionele ElseClause.
 	@Override
 	public void enterIfStatement(ICSSParser.IfStatementContext ctx) {
 		IfClause ifc = new IfClause();

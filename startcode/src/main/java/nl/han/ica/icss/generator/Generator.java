@@ -52,6 +52,7 @@ public class Generator {
 	}
 
 	// maak inspringing
+	// [GE02] Indent: 2 spaties per scopeniveau.
 	private StringBuilder addSpaces(StringBuilder css, int level) {
 		for (int i = 0; i < level; i++) css.append("  "); // 2 spaties per scope
 		return css;
@@ -71,6 +72,7 @@ public class Generator {
 	}
 
 	// converteer literal naar css string
+	// [GE01] AST → CSS2 string: selectors, declaraties en literal→CSS string omzetting.
 	private String literalToCss(Expression e) {
 		if (e instanceof ColorLiteral) return ((ColorLiteral) e).value;
 		if (e instanceof PixelLiteral) return ((PixelLiteral) e).value + "px";
