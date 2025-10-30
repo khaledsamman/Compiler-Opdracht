@@ -197,8 +197,8 @@ public class ASTListener extends ICSSBaseListener {
 		if (phaseTop != null && parents.peek() instanceof IfClause) {
 			int phase = ifPhase.pop();
 			if (phase == 0) {
-				// THEN-block: kinderen direct aan IfClause.body toevoegen.
-				// Truc: push dezelfde IfClause nogmaals zodat exitBlock daarvoor kan poppen.
+				// then block. kinderen direct aan IfClause.body toevoegen.
+				// dezelfde IfClause nogmaals pushen zodat exitBlock daarvoor kan poppen.
 				parents.push(parents.peek());
 			} else {
 				// ELSE-block: maak ElseClause en routeer kinderen daarheen.
@@ -206,11 +206,9 @@ public class ASTListener extends ICSSBaseListener {
 				((IfClause) parents.peek()).addChild(ec);
 				parents.push(ec);
 			}
-			ifPhase.push(phase + 1); // volgende block (indien aanwezig) wordt ELSE
+			ifPhase.push(phase + 1); // indien aanwezig, wordt volgende block else
 			return;
 		}
-
-		// Anders: generieke block (we gebruiken je huidige container als target)
 		parents.push(parents.peek());
 	}
 

@@ -64,9 +64,9 @@ public class Generator {
 			if (child instanceof TagSelector)
 				return ((TagSelector) child).tag;
 			if (child instanceof ClassSelector)
-				return "." + ((ClassSelector) child).cls;
+				return ((ClassSelector) child).cls;
 			if (child instanceof IdSelector)
-				return "#" + ((IdSelector) child).id;
+				return ((IdSelector) child).id;
 		}
 		return "";
 	}

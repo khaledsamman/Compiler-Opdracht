@@ -126,6 +126,11 @@ public class Evaluator implements Transform {
     }
 
     // vermenigvuldig twee literals
+    //Scalar * Pixel -> Pixel
+    //Pixel * Scalar -> Pixel
+    //Scalar * Percentage -> Percentage
+    //Percentage * Scalar -> Percentage
+    //Scalar * Scalar -> Scalar
     private Literal multiplyLiterals(Literal left, Literal right) {
         if (left instanceof ScalarLiteral && right instanceof PixelLiteral)
             return new PixelLiteral(((ScalarLiteral) left).value * ((PixelLiteral) right).value);
